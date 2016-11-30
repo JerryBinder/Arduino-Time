@@ -72,10 +72,10 @@ void loop() {
   if(clockMode > 5)
     clockMode = 0;
 
-  if(running && buttonOrangeState == LOW) {
+  if(running && buttonOrangeState == LOW && clockMode != 5) {
     running = false;
   } 
-  else if(!running && buttonOrangeState == LOW) {
+  else if(!running && buttonOrangeState == LOW && clockMode != 5) {
     running = true;
   }
   
@@ -152,7 +152,6 @@ void loop() {
       lcd.print(minute(), HEX);
       lcd.print(':');
       lcd.print(second(), HEX);
-      break;
       if(elapsedSec > 0)
       {
         lcd.setCursor(0,1);
@@ -164,6 +163,7 @@ void loop() {
         lcd.print(':');
         lcd.print(elapsedSec);
       }
+      break;
     }
     case 4: // stopwatch
     {
