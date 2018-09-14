@@ -1,4 +1,6 @@
 # Time
+Made with Isaac Figueroa.
+
 Proof of concept for an Arduino device featuring the following:
 
 * Settable clock
@@ -7,6 +9,6 @@ Proof of concept for an Arduino device featuring the following:
 * LED mood light, which gradually cycles from bright cold light at midday to cool, dim light at night.
 * Time display can be set to different bases, such as hexidecimal.
 
-Slideshow Link (editable):
+For more information, check out the project's presentation slideshow:
 
 https://docs.google.com/presentation/d/1KrbM9JQbbZiO5QuJvHQMmM7-p94z-rmzHsKcqhOngYw/edit?usp=sharing
