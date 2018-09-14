@@ -15,14 +15,15 @@ const int yellowPin = 9;
 const int whitePin = 6;
 const long interval = 1000;
 
-const bool debug = true;  // displays button high/low states on second line
+const bool debug = false;  // if true, displays button high/low states on second line
 
   // Buttons are named after the color of the wire connecting them to digital ports
 bool buttonOrangeState;
 bool buttonBlueState;
 bool buttonRedState;
 int clockMode;    // used to switch between clock modes
-int elapsed;  // current time saved in stopwatch
+int elapsedSec;  // current time saved in stopwatch
+int elapsedMin;
 unsigned long currentMillis;
 unsigned long previousMillis;
 bool running;
@@ -40,7 +41,8 @@ void setup() {
   buttonBlueState = 0;
   buttonRedState = 0;
   clockMode = 0;
-  elapsed = 0;
+  elapsedSec = 0;
+  elapsedMin = 0;
   currentMillis = 0;
   previousMillis = 0;
   running = 0;
@@ -70,6 +72,23 @@ void loop() {
   if(clockMode > 5)
     clockMode = 0;
 
+  if(running && buttonOrangeState == LOW && clockMode != 5) {
+    running = false;
+  } 
+  else if(!running && buttonOrangeState == LOW && clockMode != 5) {
+    running = true;
+  }
+  
+  if(elapsedSec > 0 || elapsedMin > 0)
+  {
+    if(clockMode != 5 && buttonRedState == LOW)
+    {
+      elapsedSec = 0;
+      running = false;
+    }
+  }
+  
+
   switch(clockMode)
   {
     case 0: // military
@@ -79,6 +98,17 @@ void loop() {
       lcd.print(minute());
       lcd.print(':');
       lcd.print(second());
+      if(elapsedSec > 0)
+      {
+        lcd.setCursor(0,1);
+        if(running)
+          lcd.print("Running: ");
+        else
+          lcd.print("Paused: ");
+        lcd.print(elapsedMin);
+        lcd.print(':');
+        lcd.print(elapsedSec);
+      }
       break;
     }
     case 1: // AM/PM
@@ -92,6 +122,17 @@ void loop() {
         lcd.print(" AM");
       else
         lcd.print(" PM");
+      if(elapsedSec > 0)
+      {
+        lcd.setCursor(0,1);
+        if(running)
+          lcd.print("Running: ");
+        else
+          lcd.print("Paused: ");
+        lcd.print(elapsedMin);
+        lcd.print(':');
+        lcd.print(elapsedSec);
+      }
       break;
     }
     case 2: // binary
@@ -111,6 +152,17 @@ void loop() {
       lcd.print(minute(), HEX);
       lcd.print(':');
       lcd.print(second(), HEX);
+      if(elapsedSec > 0)
+      {
+        lcd.setCursor(0,1);
+        if(running)
+          lcd.print("Running: ");
+        else
+          lcd.print("Paused: ");
+        lcd.print(elapsedMin);
+        lcd.print(':');
+        lcd.print(elapsedSec);
+      }
       break;
     }
     case 4: // stopwatch
@@ -143,11 +195,35 @@ void loop() {
     lcd.print("  ");
     lcd.print(running);
   }
+  
+    // Increment stopwatch even if it's not being displayed, as long as running=true
+  if(running && (millis() - previousMillis >= interval))
+  {
+    previousMillis = millis();
+    elapsedSec++;
+  }
+  if(elapsedSec > 60)
+  {
+    elapsedSec = 0;
+    elapsedMin++;
+  }
+
+  if(debug && clockMode < 2)
+  {
+    lcd.setCursor(0, 1);
+    lcd.print(buttonBlueState);
+    lcd.print("  ");
+    lcd.print(buttonOrangeState);
+    lcd.print("  ");
+    lcd.print(buttonRedState);
+    lcd.print("  ");
+    lcd.print(running);
+  }
 
   if(running && (millis() - previousMillis >= interval))
   {
     previousMillis = millis();
-    elapsed++;
+    elapsedSec++;
   }
   
   if(clockMode == 5)
@@ -159,39 +235,140 @@ void loop() {
 // Sets LED colors based on current hour
 void setLedColors()
 {
-  if(0 < hour() && hour() < 5)
+  switch(hour())
   {
-    analogWrite(redPin, 255); 
-    analogWrite(yellowPin, 130); 
-    analogWrite(whitePin, 0);
-  }
-  else if(20 < hour() && hour() < 24)
-  {
-    analogWrite(redPin, 255); 
-    analogWrite(yellowPin, 130); 
-    analogWrite(whitePin, 0);
-  }
-  else if(5 < hour() && hour() < 10)
-  {
-    analogWrite(redPin, 130); 
-    analogWrite(yellowPin, 130); 
-    analogWrite(whitePin, 130);
-  }
-  else if(14 < hour() && hour() < 20)
-  {
-    analogWrite(redPin, 130); 
-    analogWrite(yellowPin, 130); 
-    analogWrite(whitePin, 130);
-  }
-  else if(10 < hour() && hour () < 14)
-  {
-    analogWrite(redPin, 0); 
-    analogWrite(yellowPin, 100); 
-    analogWrite(whitePin, 255);
+    case 23:
+    case 1:
+    {
+      analogWrite(redPin, 255); 
+      analogWrite(yellowPin, 145); 
+      analogWrite(whitePin, 0);
+      break;
+    }
+    case 22:
+    case 2:
+    {
+      analogWrite(redPin, 255); 
+      analogWrite(yellowPin, 165); 
+      analogWrite(whitePin, 0);
+      break;
+    }
+    case 21:
+    case 3:
+    {
+      analogWrite(redPin, 235); 
+      analogWrite(yellowPin, 185); 
+      analogWrite(whitePin, 0);
+      break;
+    }
+    case 20:
+    case 4:
+    {
+      analogWrite(redPin, 200); 
+      analogWrite(yellowPin, 215); 
+      analogWrite(whitePin, 0);
+      break;
+    }
+    case 19:
+    case 5:
+    {
+      analogWrite(redPin, 180); 
+      analogWrite(yellowPin, 235); 
+      analogWrite(whitePin, 100);
+      break;
+    }
+    case 18:
+    case 6:
+    {
+      analogWrite(redPin, 140); 
+      analogWrite(yellowPin, 255); 
+      analogWrite(whitePin, 125);
+      break;
+    }
+    case 17:
+    case 7:
+    {
+      analogWrite(redPin, 100); 
+      analogWrite(yellowPin, 235); 
+      analogWrite(whitePin, 160);
+      break;
+    }
+    case 16:
+    case 8:
+    {
+      analogWrite(redPin, 50); 
+      analogWrite(yellowPin, 215); 
+      analogWrite(whitePin, 200);
+      break;
+    }
+    case 15:
+    case 9:
+    {
+      analogWrite(redPin, 0); 
+      analogWrite(yellowPin, 195); 
+      analogWrite(whitePin, 220);
+      break;
+    }
+    case 14:
+    case 10:
+    {
+      analogWrite(redPin, 0); 
+      analogWrite(yellowPin, 175); 
+      analogWrite(whitePin, 240);
+      break;
+    }
+    case 13:
+    case 11:
+    {
+      analogWrite(redPin, 0); 
+      analogWrite(yellowPin, 155); 
+      analogWrite(whitePin, 255);
+      break;
+    }
+    case 12:
+    {
+      analogWrite(redPin, 0); 
+      analogWrite(yellowPin, 135); 
+      analogWrite(whitePin, 255);
+      break;
+    }
   }
 }
 
 void stopwatch()
+{
+  if(elapsedSec == 0 && elapsedMin == 0)
+    lcd.print("0:0");
+  else
+  {
+    lcd.print(elapsedMin);
+    lcd.print(':');
+    lcd.print(elapsedSec);
+  }
+
+  if(elapsedSec== 0 && !running)
+  {
+    lcd.setCursor(0,1);
+    lcd.print("Press to start.");
+  }
+
+  if(elapsedSec > 0 && running)
+  {
+    lcd.setCursor(0,1);
+    lcd.print("Running");
+  }
+
+  if(elapsedSec > 0 && !running)
+  {
+    if(second() % 2 == 0)
+    {
+      lcd.setCursor(0,1);
+      lcd.print("Paused");
+    }
+  }
+}
+
+void clockSet()
 {
   if(running && buttonOrangeState == LOW) {
     running = false;
