@@ -4,8 +4,8 @@ Proof of concept for an Arduino device featuring the following:
 * Settable clock
  * Python script to set Arduino's clock through a USB connection to a PC
 * Stopwatch
-* Timer
 * LED mood light, which gradually cycles from bright cold light at midday to cool, dim light at night.
+* Time display can be set to different bases, such as hexidecimal.
 
 Slideshow Link (editable):
 
